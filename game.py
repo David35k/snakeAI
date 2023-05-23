@@ -83,7 +83,7 @@ class SnakeGameAI:
         # 3. check if game over
         reward = 0
         game_over = False
-        if self._is_collision() and self.frame_iteration > 100 * len(self.snake):
+        if self.is_collision() and self.frame_iteration > 100 * len(self.snake):
             game_over = True
             reward = -10
             return reward, game_over, self.score
@@ -102,7 +102,7 @@ class SnakeGameAI:
         # 6. return game over and score
         return reward, game_over, self.score
 
-    def _is_collision(self, pt=None):
+    def is_collision(self, pt=None):
         if pt is None:
             pt = self.head
         # hits boundary
@@ -146,32 +146,28 @@ class SnakeGameAI:
         clock_wise = [Direction.RIGHT, Direction.DOWN, Direction.LEFT, Direction.UP]
         idx = clock_wise.index(self.direction)
 
+        if np.array_equal(action, [1, 0, 0]):
+            new_dir = clock_wise[idx]  # no change in direction
+        elif np.array_equal(action, [0, 1, 0]):
+            next_idx = (idx + 1) % 4
+            new_dir = clock_wise[next_idx]  # turn right
+        else:
+            next_idx = (idx - 1) % 4
+            new_dir = clock_wise[next_idx]  # turn left
 
+        self.direction = new_dir
 
         x = self.head.x
         y = self.head.y
-        if direction == Direction.RIGHT:
+
+
+        if self.direction == Direction.RIGHT:
             x += BLOCK_SIZE
-        elif direction == Direction.LEFT:
+        elif self.direction == Direction.LEFT:
             x -= BLOCK_SIZE
-        elif direction == Direction.DOWN:
+        elif self.direction == Direction.DOWN:
             y += BLOCK_SIZE
-        elif direction == Direction.UP:
+        elif self.direction == Direction.UP:
             y -= BLOCK_SIZE
 
         self.head = Point(x, y)
-
-
-if __name__ == "__main__":
-    game = SnakeGameAI()
-
-    # game loop
-    while True:
-        game_over, score = game.play_step()
-
-        if game_over == True:
-            break
-
-    print("Final Score", score)
-
-    pygame.quit()
